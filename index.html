@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thumbnail Customizer</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Euclid+Circular+B:wght@400;500&display=swap"
+    rel="stylesheet">
+  <script src="https://unpkg.com/html-to-image@1.11.11/dist/html-to-image.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sonner@1.4.17/dist/sonner.min.js"></script>
+  <style>
+    :root {
+      --emerald-400: #34d399;
+      --emerald-500: #10b981;
+      --emerald-600: #059669;
+      --cyan-400: #22d3ee;
+      --cyan-500: #06b6d4;
+      --cyan-600: #0891b2;
+      --slate-50: #f8fafc;
+      --slate-100: #f1f5f9;
+      --slate-200: #e2e8f0;
+      --slate-600: #475569;
+      --slate-800: #1e293b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, var(--slate-50) 0%, white 50%, var(--slate-100) 100%);
+      color: var(--slate-800);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding-top: 2rem;
+    }
+
+    .header h1 {
+      font-size: 2.25rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      background: linear-gradient(to bottom right, #28F29C, #0CB8E0);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .header p {
+      font-size: 1.125rem;
+      color: var(--slate-600);
+      max-width: 42rem;
+      margin: 0 auto;
+    }
+
+    /* Main Content */
+    .main-content {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      align-items: flex-start;
+      justify-content: center;
+    }
+
+    @media (min-width: 1024px) {
+      .main-content {
+        flex-direction: row;
+      }
+    }
+
+    /* Preview Section */
+    .preview-section {
+      flex-shrink: 0;
+    }
+
+    .preview-card {
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      padding: 2rem;
+      border: 1px solid var(--slate-200);
+    }
+
+    .preview-card h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      color: var(--slate-800);
+    }
+
+    .preview-container {
+      overflow: hidden;
+      border-radius: 0.75rem;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .preview-inner {
+      transform: scale(0.6);
+      transform-origin: top left;
+      width: 800px;
+      height: 450px;
+    }
+
+    @media (min-width: 640px) {
+      .preview-inner {
+        transform: scale(0.75);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .preview-inner {
+        transform: scale(1);
+      }
+    }
+
+    /* Thumbnail Preview */
+    .thumbnail-preview {
+      position: relative;
+      background: white;
+      overflow: hidden;
+      width: 800px;
+      height: 450px;
+    }
+
+    .gradient-text {
+      background: linear-gradient(to bottom right, #28F29C, #0CB8E0);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    /* Customizer Section */
+    .customizer-section {
+      flex-shrink: 0;
+      width: 100%;
+      max-width: 28rem;
+    }
+
+    .customizer-card {
+      width: 100%;
+      background: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      border: 1px solid var(--slate-200);
+    }
+
+    .customizer-header {
+      padding: 1.5rem 1.5rem 0;
+    }
+
+    .customizer-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      background: linear-gradient(to bottom right, #28F29C, #0CB8E0);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .customizer-content {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .form-label {
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.375rem;
+      border: 1px solid var(--slate-200);
+      font-size: 0.875rem;
+      transition: border-color 0.2s;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--cyan-500);
+      box-shadow: 0 0 0 1px var(--cyan-500);
+    }
+
+    .form-textarea {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.375rem;
+      border: 1px solid var(--slate-200);
+      font-size: 0.875rem;
+      min-height: 6rem;
+      resize: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-textarea:focus {
+      outline: none;
+      border-color: var(--cyan-500);
+      box-shadow: 0 0 0 1px var(--cyan-500);
+    }
+
+    /* Range Slider */
+    .range-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .range-slider {
+      width: 100%;
+      height: 6px;
+      border-radius: 5px;
+      background: var(--slate-200);
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    .range-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: linear-gradient(to bottom right, #28F29C, #0CB8E0);
+      cursor: pointer;
+    }
+
+    .range-slider::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: linear-gradient(to bottom right, #28F29C, #0CB8E0);
+      cursor: pointer;
+      border: none;
+    }
+
+    .range-values {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .range-value-display {
+      font-size: 0.75rem;
+      color: var(--slate-600);
+      background: var(--slate-100);
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      min-width: 3rem;
+      text-align: center;
+    }
+
+    /* Buttons */
+    .button-group {
+      display: flex;
+      gap: 0.5rem;
+      padding-top: 1rem;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .button-primary {
+      background: linear-gradient(to bottom right, #28F29C, #0CB8E0);
+      color: white;
+      border: none;
+      flex: 1;
+    }
+
+    .button-primary:hover {
+      background: linear-gradient(to bottom right, #28F29C, #0CB8E0);
+      opacity: 0.9;
+    }
+
+    .button-outline {
+      background: white;
+      border: 1px solid var(--slate-200);
+      color: var(--slate-800);
+      flex-shrink: 0;
+    }
+
+    .button-outline:hover {
+      background: var(--slate-50);
+    }
+
+    .button-icon {
+      margin-right: 0.5rem;
+      width: 1rem;
+      height: 1rem;
+    }
+
+    /* Features Section */
+    .features-section {
+      margin-top: 4rem;
+      text-align: center;
+      padding-bottom: 2rem;
+    }
+
+    .features-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 2rem;
+      color: var(--slate-800);
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      max-width: 56rem;
+      margin: 0 auto;
+    }
+
+    @media (min-width: 768px) {
+      .features-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .feature-card {
+      background: white;
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      border: 1px solid var(--slate-200);
+    }
+
+    .feature-icon {
+      width: 3rem;
+      height: 3rem;
+      background: linear-gradient(to bottom right, #28F29C, #0CB8E0);
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+    }
+
+    .feature-icon svg {
+      width: 1.5rem;
+      height: 1.5rem;
+      color: white;
+    }
+
+    .feature-title {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .feature-description {
+      font-size: 0.875rem;
+      color: var(--slate-600);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      padding: 0.75rem 1rem;
+      border-radius: 0.375rem;
+      background: var(--slate-800);
+      color: white;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      animation: slideIn 0.2s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateY(100%);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .toast-success {
+      background: var(--emerald-500);
+    }
+
+    .toast-error {
+      background: #ef4444;
+    }
+
+    .toast-info {
+      background: var(--cyan-500);
+    }
+
+    /* Preview Elements */
+    .preview-element {
+      position: absolute;
+    }
+
+    .preview-hashtag {
+      color: #8f8f8f;
+      font-family: 'Euclid Circular B', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 113.5%;
+      letter-spacing: 0.06px;
+      text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+      left: 62px;
+      top: 110px;
+    }
+
+    .preview-title {
+      font-family: 'Euclid Circular B', sans-serif;
+      font-size: 37px;
+      font-weight: 400;
+      line-height: 113.5%;
+      letter-spacing: -0.37px;
+      text-shadow: 0px 4px 15px rgba(0, 0, 0, 0.25);
+      left: 63px;
+      top: 131px;
+      width: 286px;
+    }
+
+    .preview-subtitle {
+      color: #8f8f8f;
+      font-family: 'Euclid Circular B', sans-serif;
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 113.5%;
+      letter-spacing: 0.16px;
+      text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+      left: 67px;
+      top: 265px;
+      width: 228px;
+    }
+
+    .preview-avatar {
+      border-radius: 50%;
+      width: 38px;
+      height: 38px;
+      filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
+      left: 62px;
+      top: 330px;
+      background: linear-gradient(to bottom right, #28F29C, #0CB8E0);
+    }
+
+    .preview-verification {
+      left: 200px;
+      top: 330px;
+      width: 19px;
+      height: 19px;
+    }
+
+    .preview-author {
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 127%;
+      letter-spacing: 0.16px;
+      text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+      left: 105px;
+      top: 330px;
+      width: 98px;
+    }
+
+    .preview-website {
+      color: #8f8f8e;
+      font-family: 'Inter', sans-serif;
+      font-size: 9.5px;
+      font-weight: 500;
+      letter-spacing: 0.095px;
+      text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+      left: 107px;
+      top: 351px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>Thumbnail Customizer</h1>
+      <p>
+        Create beautiful YouTube thumbnails with custom text, author info,
+        and branding. Pixel-perfect design that matches the latest trends.
+      </p>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Preview Section -->
+      <div class="preview-section">
+        <div class="preview-card">
+          <h2>Live Preview</h2>
+          <div class="preview-container">
+            <div class="preview-inner">
+              <div id="thumbnail-preview" class="thumbnail-preview">
+                <!-- Thumbnail content will be rendered here by JavaScript -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Customizer Section -->
+      <div class="customizer-section">
+        <div class="customizer-card">
+          <div class="customizer-header">
+            <h3 class="customizer-title">Customize Thumbnail</h3>
+          </div>
+          <div class="customizer-content">
+            <div class="form-group">
+              <label for="hashtag" class="form-label">Hashtag</label>
+              <input type="text" id="hashtag" class="form-input" placeholder="#YourHashtag">
+            </div>
+
+            <div class="form-group">
+              <label for="title" class="form-label">Title</label>
+              <textarea id="title" class="form-textarea" placeholder="Your awesome title here" rows="3"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="subtitle" class="form-label">Subtitle</label>
+              <textarea id="subtitle" class="form-textarea" placeholder="A compelling subtitle" rows="2"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="authorName" class="form-label">Author Name</label>
+              <input type="text" id="authorName" class="form-input" placeholder="Your Name">
+            </div>
+
+            <div class="form-group">
+              <label for="website" class="form-label">Website</label>
+              <input type="text" id="website" class="form-input" placeholder="yourwebsite.com">
+            </div>
+
+            <div class="form-group">
+              <label for="avatarUrl" class="form-label">Avatar URL</label>
+              <input type="text" id="avatarUrl" class="form-input" placeholder="https://example.com/avatar.jpg">
+            </div>
+
+            <div class="range-group">
+              <label class="form-label">Gradient Position</label>
+              <div class="form-group">
+                <label for="gradientX" class="form-label" style="font-size: 0.75rem; margin-bottom: 0.25rem;">Horizontal
+                  (X)</label>
+                <input type="range" id="gradientX" class="range-slider" min="0" max="100" value="50">
+                <div class="range-values">
+                  <span class="range-value-display" id="gradientXValue">72%</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="gradientY" class="form-label" style="font-size: 0.75rem; margin-bottom: 0.25rem;">Vertical
+                  (Y)</label>
+                <input type="range" id="gradientY" class="range-slider" min="0" max="100" value="50">
+                <div class="range-values">
+                  <span class="range-value-display" id="gradientYValue">50%</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="button-group">
+              <button id="download-btn" class="button button-primary">
+                <svg class="button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                </svg>
+                Download
+              </button>
+              <button id="reset-btn" class="button button-outline">
+                <svg class="button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                  </path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="features-section">
+      <h3 class="features-title">Features</h3>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+              </path>
+            </svg>
+          </div>
+          <h4 class="feature-title">Pixel Perfect</h4>
+          <p class="feature-description">
+            Exact replica of professional thumbnail designs with perfect
+            gradients and spacing
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4">
+              </path>
+            </svg>
+          </div>
+          <h4 class="feature-title">Fully Customizable</h4>
+          <p class="feature-description">
+            Change title, subtitle, author info, hashtags, avatar, and gradient position with
+            real-time preview
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+            </svg>
+          </div>
+          <h4 class="feature-title">High Quality Export</h4>
+          <p class="feature-description">
+            Download high-resolution PNG images perfect for YouTube and
+            social media
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===== DROP-IN REPLACEMENT FOR YOUR EXISTING JAVASCRIPT =====
+
+    // Default data (unchanged)
+    const defaultData = {
+      hashtag: "#WillOnSuccess",
+      title: "How To Fork A GitHub Repository",
+      subtitle: "A Step-By-Step Guide For Beginners",
+      authorName: "Will Napolini",
+      website: "willonsuccess.com",
+      avatarUrl: "https://avatars.githubusercontent.com/u/192521042?v=4",
+      gradientX: 70,
+      gradientY: 50
+    };
+
+    // Current thumbnail data (unchanged)
+    let thumbnailData = { ...defaultData };
+
+    // DOM elements (unchanged)
+    const thumbnailPreview = document.getElementById('thumbnail-preview');
+    const hashtagInput = document.getElementById('hashtag');
+    const titleInput = document.getElementById('title');
+    const subtitleInput = document.getElementById('subtitle');
+    const authorNameInput = document.getElementById('authorName');
+    const websiteInput = document.getElementById('website');
+    const avatarUrlInput = document.getElementById('avatarUrl');
+    const gradientXInput = document.getElementById('gradientX');
+    const gradientYInput = document.getElementById('gradientY');
+    const gradientXValue = document.getElementById('gradientXValue');
+    const gradientYValue = document.getElementById('gradientYValue');
+    const downloadBtn = document.getElementById('download-btn');
+    const resetBtn = document.getElementById('reset-btn');
+
+    // ===== NEW: SEO Filename Generation Function =====
+    function generateSEOFilename(title, options = {}) {
+      const {
+        prefix = 'thumbnail',
+        suffix = '',
+        maxLength = 150,
+        addTimestamp = false,
+        fileExtension = 'png'
+      } = options;
+
+      // Handle empty or invalid title
+      if (!title || typeof title !== 'string' || title.trim() === '') {
+        title = 'custom-thumbnail';
+      }
+
+      // Convert to lowercase and clean all parts of the filename
+      const cleanString = (str) => {
+        return str.toLowerCase()
+          .replace(/\s+/g, '-')          // Replace spaces with dashes
+          .replace(/[^a-z0-9-]/g, '')    // Remove special characters
+          .replace(/-+/g, '-')           // Replace multiple dashes with single
+          .replace(/^-+|-+$/g, '');      // Remove leading/trailing dashes
+      };
+
+      // Clean all components
+      title = cleanString(title);
+      const cleanedPrefix = prefix ? cleanString(prefix) : '';
+      const cleanedSuffix = suffix ? cleanString(suffix) : '';
+
+      // Build filename
+      let filename = '';
+      if (cleanedPrefix) filename += `${cleanedPrefix}-`;
+      filename += title;
+      if (cleanedSuffix) filename += `-${cleanedSuffix}`;
+
+      // Add timestamp if requested
+      if (addTimestamp) {
+        const now = new Date();
+        const timestamp = now.toISOString().slice(0, 10); // YYYY-MM-DD format
+        filename += `-${timestamp}`;
+      }
+
+      // Ensure filename doesn't exceed maxLength
+      const extensionLength = fileExtension.length + 1; // +1 for the dot
+      const maxFilenameLength = maxLength - extensionLength;
+
+      if (filename.length > maxFilenameLength) {
+        filename = filename.substring(0, maxFilenameLength);
+        // Remove trailing dash if truncation created one
+        filename = filename.replace(/-+$/, '');
+      }
+
+      // Add file extension
+      return `${filename}.${fileExtension}`;
+    }
+
+    // Initialize form with default values (unchanged)
+    function initializeForm() {
+      hashtagInput.value = thumbnailData.hashtag;
+      titleInput.value = thumbnailData.title;
+      subtitleInput.value = thumbnailData.subtitle;
+      authorNameInput.value = thumbnailData.authorName;
+      websiteInput.value = thumbnailData.website;
+      avatarUrlInput.value = thumbnailData.avatarUrl;
+      gradientXInput.value = thumbnailData.gradientX;
+      gradientYInput.value = thumbnailData.gradientY;
+      gradientXValue.textContent = thumbnailData.gradientX + '%';
+      gradientYValue.textContent = thumbnailData.gradientY + '%';
+    }
+
+    // Calculate gradient position based on percentage (unchanged)
+    function calculateGradientPosition(xPercent, yPercent) {
+      const canvasWidth = 800;
+      const canvasHeight = 450;
+      const gradientWidth = 417;
+      const gradientHeight = 414;
+
+      const x = (xPercent / 100) * canvasWidth - (gradientWidth / 2);
+      const y = (yPercent / 100) * canvasHeight - (gradientHeight / 2);
+
+      return { x, y };
+    }
+
+    // Render thumbnail preview (unchanged)
+    function renderThumbnailPreview() {
+      const gradientPos = calculateGradientPosition(thumbnailData.gradientX, thumbnailData.gradientY);
+
+      thumbnailPreview.innerHTML = `
+    <!-- Background gradient blob -->
+    <div class="preview-element" style="inset: 0">
+      <svg width="417" height="414" viewBox="0 0 417 414" fill="none" xmlns="http://www.w3.org/2000/svg" style="position: absolute; left: ${gradientPos.x}px; top: ${gradientPos.y}px;">
+        <g filter="url(#filter0_f_469_2147)">
+          <ellipse cx="208.051" cy="206.776" rx="142.051" ry="140.776" fill="url(#paint0_linear_469_2147)"></ellipse>
+        </g>
+        <defs>
+          <filter id="filter0_f_469_2147" x="0" y="0" width="416.104" height="413.552" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+            <feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood>
+            <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"></feBlend>
+            <feGaussianBlur stdDeviation="33" result="effect1_foregroundBlur_469_2147"></feGaussianBlur>
+          </filter>
+          <linearGradient id="paint0_linear_469_2147" x1="137.069" y1="136.342" x2="277.838" y2="278.392" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#28F29C"></stop>
+            <stop offset="1" stop-color="#0CB8E0"></stop>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+
+    <!-- Hashtag -->
+    <div class="preview-element preview-hashtag">
+      ${thumbnailData.hashtag}
+    </div>
+
+    <!-- Main Title -->
+    <div class="preview-element preview-title gradient-text">
+      ${thumbnailData.title}
+    </div>
+
+    <!-- Subtitle -->
+    <div class="preview-element preview-subtitle">
+      ${thumbnailData.subtitle}
+    </div>
+
+    <!-- Avatar -->
+    <img src="${thumbnailData.avatarUrl}" alt="Avatar" class="preview-element preview-avatar">
+
+    <!-- Verification checkmark -->
+    <svg class="preview-element preview-verification" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M9.22059 0C10.184 0 10.8902 1.52914 11.7595 1.80707C12.6604 2.0952 14.1429 1.27678 14.8927 1.81415C15.6504 2.35692 15.3151 4.00143 15.866 4.74709C16.4118 5.48546 18.1071 5.6767 18.3997 6.56372C18.6818 7.41956 17.4338 8.55145 17.4338 9.5C17.4338 10.4485 18.6818 11.5804 18.3995 12.4362C18.1071 13.3232 16.4119 13.5145 15.8659 14.2528C15.3146 14.9986 15.6501 16.6435 14.8926 17.1858C14.1426 17.7232 12.6603 16.9047 11.7593 17.1929C10.8902 17.4708 10.184 19 9.22059 19C8.25718 19 7.55094 17.4708 6.68169 17.1929C5.78081 16.9047 4.2984 17.7232 3.54846 17.1858C2.79091 16.643 3.12619 14.9986 2.57512 14.2528C2.02935 13.5145 0.33414 13.3232 0.0415068 12.4362C-0.240569 11.5804 1.00745 10.4485 1.00745 9.5C1.00745 8.55145 -0.240569 7.41956 0.0417182 6.56372C0.33414 5.6767 2.02935 5.48546 2.57534 4.74709C3.12661 4.00143 2.79112 2.3565 3.54867 1.81415C4.29862 1.27678 5.78103 2.0952 6.68191 1.80707C7.55094 1.52914 8.25718 0 9.22059 0Z" fill="url(#paint0_linear_469_2173)"></path>
+      <path d="M6.21416 9.43102C5.8868 9.10372 5.35607 9.10372 5.02872 9.43102C4.70136 9.75838 4.70136 10.2892 5.02872 10.6165L6.21416 9.43102ZM5.02872 10.6165L7.82284 13.4106L9.00827 12.2251L6.21416 9.43102L5.02872 10.6165Z" fill="white"></path>
+      <path d="M13.4121 7.82257C13.7395 7.49521 13.7395 6.96444 13.4121 6.63708C13.0848 6.30978 12.554 6.30978 12.2267 6.63708L13.4121 7.82257ZM8.3827 12.852L13.4121 7.82257L12.2267 6.63708L7.19727 11.6665L8.3827 12.852Z" fill="white"></path>
+      <defs>
+        <linearGradient id="paint0_linear_469_2173" x1="4.61309" y1="4.74691" x2="14.1089" y2="13.9637" gradientUnits="userSpaceOnUse">
+          <stop stop-color="#28F29C"></stop>
+          <stop offset="1" stop-color="#0CB8E0"></stop>
+        </linearGradient>
+      </defs>
+    </svg>
+
+    <!-- Author Name -->
+    <div class="preview-element preview-author gradient-text">
+      ${thumbnailData.authorName}
+    </div>
+
+    <!-- Website -->
+    <div class="preview-element preview-website">
+      ${thumbnailData.website}
+    </div>
+  `;
+    }
+
+    // Show toast notification (unchanged)
+    function showToast(message, type = 'info') {
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
+
+    // ===== ENHANCED: Handle download with Author Name + Title SEO filename =====
+async function handleDownload() {
+  if (!thumbnailPreview) {
+    showToast('Thumbnail preview not found', 'error');
+    return;
+  }
+
+  try {
+    showToast('Generating image...', 'info');
+
+    // Convert to WebP instead of PNG
+    const dataUrl = await htmlToImage.toCanvas(thumbnailPreview, {
+      quality: 0.92, // WebP quality (0.8-1.0 is good)
+      pixelRatio: 2,  // High DPI for crisp thumbnails
+      width: 800,
+      height: 450,
+    }).then(canvas => canvas.toDataURL('image/webp', 0.92));
+
+    const title = thumbnailData.title || titleInput.value || 'custom-thumbnail';
+    const authorName = (thumbnailData.authorName || authorNameInput.value || '').toLowerCase();
+    const website = (thumbnailData.website || websiteInput.value || '').toLowerCase();
+
+    let prefix = '';
+    if (authorName && website) {
+      const cleanWebsite = website
+        .replace(/^(https?:\/\/)?(www\.)?/, '')
+        .replace(/\.(com|net|org|io|co|edu|gov).*$/, '')
+        .replace(/[^a-z0-9]/g, '');
+      prefix = cleanWebsite ? `${authorName}-${cleanWebsite}` : authorName;
+    } else if (authorName) {
+      prefix = authorName;
+    } else if (website) {
+      const cleanWebsite = website
+        .replace(/^(https?:\/\/)?(www\.)?/, '')
+        .replace(/\.(com|net|org|io|co|edu|gov).*$/, '')
+        .replace(/[^a-z0-9]/g, '');
+      prefix = cleanWebsite || 'thumbnail';
+    } else {
+      prefix = 'thumbnail';
+    }
+
+    // Update file extension to .webp
+    const seoFilename = generateSEOFilename(title, {
+      prefix: prefix,
+      fileExtension: 'webp' // Changed from 'png' to 'webp'
+    }).toLowerCase();
+
+    const link = document.createElement('a');
+    link.href = dataUrl;
+    link.download = seoFilename;
+    link.click();
+
+    showToast(`Downloaded: ${seoFilename}`, 'success');
+  } catch (error) {
+    console.error('Error generating image:', error);
+    showToast('Failed to generate image', 'error');
+  }
+}
+
+    // Handle reset (unchanged)
+    function handleReset() {
+      thumbnailData = { ...defaultData };
+      initializeForm();
+      renderThumbnailPreview();
+      showToast('Reset to default values', 'success');
+    }
+
+    // Event listeners (all unchanged)
+    hashtagInput.addEventListener('input', (e) => {
+      thumbnailData.hashtag = e.target.value;
+      renderThumbnailPreview();
+    });
+
+    titleInput.addEventListener('input', (e) => {
+      thumbnailData.title = e.target.value;
+      renderThumbnailPreview();
+    });
+
+    subtitleInput.addEventListener('input', (e) => {
+      thumbnailData.subtitle = e.target.value;
+      renderThumbnailPreview();
+    });
+
+    authorNameInput.addEventListener('input', (e) => {
+      thumbnailData.authorName = e.target.value;
+      renderThumbnailPreview();
+    });
+
+    websiteInput.addEventListener('input', (e) => {
+      thumbnailData.website = e.target.value;
+      renderThumbnailPreview();
+    });
+
+    avatarUrlInput.addEventListener('input', (e) => {
+      thumbnailData.avatarUrl = e.target.value;
+      renderThumbnailPreview();
+    });
+
+    gradientXInput.addEventListener('input', (e) => {
+      thumbnailData.gradientX = parseInt(e.target.value);
+      gradientXValue.textContent = thumbnailData.gradientX + '%';
+      renderThumbnailPreview();
+    });
+
+    gradientYInput.addEventListener('input', (e) => {
+      thumbnailData.gradientY = parseInt(e.target.value);
+      gradientYValue.textContent = thumbnailData.gradientY + '%';
+      renderThumbnailPreview();
+    });
+
+    downloadBtn.addEventListener('click', handleDownload);
+    resetBtn.addEventListener('click', handleReset);
+
+    // Initialize (unchanged)
+    initializeForm();
+    renderThumbnailPreview();
+  </script>
+</body>
+
+</html>
